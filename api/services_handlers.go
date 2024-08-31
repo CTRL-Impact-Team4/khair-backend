@@ -136,7 +136,7 @@ func GetNearestOrganizationHandler(db *sql.DB) http.HandlerFunc {
 		}
 
 		// Validate the services
-		_, err := storage.GetServicesByID(db, req.Services)
+		services, err := storage.GetServicesByID(db, req.Services)
 		if err != nil {
 			http.Error(w, "One or more services do not exist", http.StatusBadRequest)
 			return
@@ -173,6 +173,8 @@ func GetNearestOrganizationHandler(db *sql.DB) http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
+
+		closestOrg.Services = services
 
 		// Return the closest organization
 		w.Header().Set("Content-Type", "application/json")

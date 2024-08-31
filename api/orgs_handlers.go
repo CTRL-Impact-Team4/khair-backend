@@ -55,6 +55,14 @@ func GetOrgByID(store *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		services, err := storage.GetServicesByOrganizationID(store, orgID)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		org.Services = services
+
 		jsonResponse, err := json.Marshal(org)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -79,6 +87,7 @@ func DeleteOrgByID(store *sql.DB) http.HandlerFunc {
 			}
 			return
 		}
+		// TODO: delete association from org/service table
 
 		w.WriteHeader(http.StatusNoContent)
 	}

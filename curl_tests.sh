@@ -28,7 +28,7 @@ response=$(curl -s -w "%{http_code}" -o /dev/null -X POST http://localhost:8080/
 }')
 
 if [ "$response" -eq 201 ]; then
-  log_message "Successfully added Organization One."
+  log_message "Successfully added Organization One.\n$response"
 else
   handle_error "Adding Organization One"
 fi
@@ -48,7 +48,7 @@ response=$(curl -s -w "%{http_code}" -o /dev/null -X POST http://localhost:8080/
 }')
 
 if [ "$response" -eq 201 ]; then
-  log_message "Successfully added Organization Two."
+  log_message "Successfully added Organization Two.\n$response"
 else
   handle_error "Adding Organization Two"
 fi
@@ -76,6 +76,17 @@ if [ "$response" -eq 200 ]; then
 else
   handle_error "Adding Service 2 to Organization Two"
 fi
+
+
+log_message "Getting Service 2 from Organization Two..."
+response=$(curl -s -X GET http://localhost:8080/orgs/org2/services -H "Content-Type: application/json")
+
+log_message "Got Service 2 to Organization Two\n$response"
+
+log_message "Getting Org 2..."
+response=$(curl -s -X GET http://localhost:8080/orgs/org2 -H "Content-Type: application/json")
+
+log_message "Got\n$response"
 
 # Step 5: Test finding the closest organization offering both services
 log_message "Finding closest organization offering both services (1 and 2)..."
