@@ -53,6 +53,19 @@ else
   handle_error "Adding Organization Two"
 fi
 
+log_message "Adding Organization Three with both services..."
+response=$(curl -s -w "%{http_code}" -o /dev/null -X POST http://localhost:8080/orgs \
+  -H "Content-Type: application/json" \
+  -d '{
+  "id": "org3",
+  "name": "Organization Three",
+  "phone": "111-222-3333",
+  "location": {
+    "latitude": 51.5074,
+    "longitude": -0.1278
+  }
+}')
+
 # Step 3: Add service "1" to the first organization
 log_message "Adding Service 1 to Organization One..."
 response=$(curl -s -w "%{http_code}" -o /dev/null -X POST http://localhost:8080/orgs/org1/services \
@@ -87,6 +100,18 @@ log_message "Getting Org 2..."
 response=$(curl -s -X GET http://localhost:8080/orgs/org2 -H "Content-Type: application/json")
 
 log_message "Got\n$response"
+
+# Step 6: Add both services to the third organization
+log_message "Adding Services 1 and 2 to Organization Three..."
+response=$(curl -s -w "%{http_code}" -o /dev/null -X POST http://localhost:8080/orgs/org3/services \
+  -H "Content-Type: application/json" \
+  -d '["1", "2"]')
+
+if [ "$response" -eq 200 ]; then
+  log_message "Successfully added Services 1 and 2 to Organization Three."
+else
+  handle_error "Adding Services 1 and 2 to Organization Three"
+fi
 
 # Step 5: Test finding the closest organization offering both services
 log_message "Finding closest organization offering both services (1 and 2)..."

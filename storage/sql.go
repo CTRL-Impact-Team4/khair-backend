@@ -72,7 +72,7 @@ func AddServicesToOrganization(db *sql.DB, orgID string, serviceIDs []string) er
 }
 
 func GetOrganizationsByServices(db *sql.DB, serviceIDs []string) ([]core.Organization, error) {
-	// Create placeholders and arguments for the SQL query
+	// Create placeholders for the IN clause
 	placeholders := make([]string, len(serviceIDs))
 	args := make([]interface{}, len(serviceIDs))
 	for i, id := range serviceIDs {
@@ -80,12 +80,18 @@ func GetOrganizationsByServices(db *sql.DB, serviceIDs []string) ([]core.Organiz
 		args[i] = id
 	}
 
+	// Query to find organizations that offer all specified services
 	query := fmt.Sprintf(`
-		SELECT DISTINCT o.id, o.name, o.phone, o.latitude, o.longitude
+		SELECT o.id, o.name, o.phone, o.latitude, o.longitude
 		FROM organizations o
 		JOIN organization_services os ON o.id = os.organization_id
 		WHERE os.service_id IN (%s)
+		GROUP BY o.id, o.name, o.phone, o.latitude, o.longitude
+		HAVING COUNT(DISTINCT os.service_id) = ?
 	`, strings.Join(placeholders, ","))
+
+	// Add the count of service IDs to the arguments list
+	args = append(args, len(serviceIDs))
 
 	rows, err := db.Query(query, args...)
 	if err != nil {
@@ -93,17 +99,16 @@ func GetOrganizationsByServices(db *sql.DB, serviceIDs []string) ([]core.Organiz
 	}
 	defer rows.Close()
 
-	var orgs []core.Organization
+	var organizations []core.Organization
 	for rows.Next() {
 		var org core.Organization
-		err := rows.Scan(&org.ID, &org.Name, &org.Phone, &org.Location.Latitude, &org.Location.Longitude)
-		if err != nil {
+		if err := rows.Scan(&org.ID, &org.Name, &org.Phone, &org.Location.Latitude, &org.Location.Longitude); err != nil {
 			return nil, err
 		}
-		orgs = append(orgs, org)
+		organizations = append(organizations, org)
 	}
 
-	return orgs, nil
+	return organizations, nil
 }
 
 func GetOrganizationByID(db *sql.DB, orgID string) (core.Organization, error) {
