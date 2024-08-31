@@ -21,8 +21,10 @@ response=$(curl -s -w "%{http_code}" -o /dev/null -X POST http://localhost:8080/
   "id": "org1",
   "name": "Organization One",
   "phone": "123-456-7890",
-  "latitude": 40.7128,
-  "longitude": -74.0060
+  "location" : {
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  }
 }')
 
 if [ "$response" -eq 201 ]; then
@@ -39,8 +41,10 @@ response=$(curl -s -w "%{http_code}" -o /dev/null -X POST http://localhost:8080/
   "id": "org2",
   "name": "Organization Two",
   "phone": "098-765-4321",
-  "latitude": 34.0522,
-  "longitude": -118.2437
+  "location":{
+    "latitude": 34.0522,
+    "longitude": -118.2437
+  }
 }')
 
 if [ "$response" -eq 201 ]; then
